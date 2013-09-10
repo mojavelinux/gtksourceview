@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
- Author: David Avsajanishvili <avsd05@gmail.com>
+ Authors: David Avsajanishvili <avsd05@gmail.com>, Dan Allen <dan.j.allen@gmail.com>
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Library General Public
@@ -22,7 +22,7 @@
 <language id="asciidoc" _name="AsciiDoc" version="2.0" _section="Markup">
   <metadata>
     <property name="mimetypes">text/asciidoc</property>
-    <property name="globs">*.asciidoc</property>
+    <property name="globs">*.asciidoc;*.adoc;*.ad;*.asc</property>
   </metadata>
 
   <styles>
@@ -32,6 +32,7 @@
     <style id="markup-pass"       _name="Passthrough Text"    map-to="def:special-char"/>
     <style id="markup-replace"    _name="Replacement"         map-to="def:special-char"/>
     <style id="markup-admonition" _name="Admonition"          map-to="def:note"/>
+    <style id="markup-attribute"  _name="Attribute"           map-to="def:string"/>
     <style id="markup-anchor"     _name="Anchor"              map-to="def:identifier"/>
     <style id="markup-crosslink"  _name="Link"                map-to="xml:element-name"/>  
     <style id="markup-url"        _name="URL"                 map-to="def:underlined"/>  
@@ -40,6 +41,7 @@
     <style id="struct-style"      _name="Style"               map-to="def:identifier"/>
     <style id="par-literal"       _name="Literal"             map-to="def:string"/>  
     <style id="block-listing"     _name="Listing"             map-to="def:comment"/>  
+    <style id="block-fenced-code" _name="Source Code"         map-to="def:comment"/>  
     <style id="block-comment"     _name="Comment"             map-to="def:comment"/>  
     <style id="block-boundary"    _name="Block Boundary"      map-to="def:identifier"/>  
     <style id="macro"             _name="Macro"               map-to="def:keyword"/>  
@@ -51,11 +53,10 @@
 
     <define-regex id="asciidocBackslash">\\</define-regex>
     <define-regex id="asciidocLineBreak">[ \t]+\s*$</define-regex>
-    <define-regex id="asciidocRuler">^''''\+\s*$</define-regex>
     
-    <define-regex id="macro-names">image|include|sys|sys2|eval</define-regex>
+    <define-regex id="macro-names">image|include|video|audio|toc|sys|sys2|eval</define-regex>
     <define-regex id="inline-macro-names">pass|latexmath|asciimath|indexterm|indexterm2|footnote|footnoteref</define-regex>
-    <define-regex id="preproc-names">ifdef|ifndef|endif|unfloat|template</define-regex>
+    <define-regex id="preproc-names">ifdef|ifndef|ifeval|endif|unfloat|template</define-regex>
 
     <!-- TITLES -->
     <context id="title">
@@ -101,6 +102,11 @@
             <context id="passthroughBlock" style-ref="block-listing" extend-parent="false">
                 <start>^(\+\+\+\++)\s*$</start>
                 <end>^(\%{1@start})\s*$</end>
+            </context>
+            <!-- NOTE fenced code blocks are specific to Asciidoctor -->
+            <context id="fencedCodeBlock" style-ref="block-listing" extend-parent="false">
+                <start>^```[^`]*$</start>
+                <end>^```$</end>
             </context>
             <context id="listingBlock" style-ref="block-listing" extend-parent="false">
                 <start>^(----+)\s*$</start>
@@ -239,6 +245,15 @@
                 <end>\]</end>
             </context>
 
+            <!-- Attributes -->
+            <context id="theAttribute" style-ref="markup-attribute" extend-parent="false">
+                <match>(?&lt;!\\)\{\w+(?:[\-]\w+)*\}</match>
+            </context>
+
+            <context id="theAttributeAssignment" style-ref="macro" extend-parent="false">
+                <match>\{(?:set|counter2?):.+?\}</match>
+            </context>
+
             <!-- CALLOUTS -->
             <context id="theCallout" style-ref="list-identifier" extend-parent="false">
                 <match>^&lt;\d+&gt;\s+</match>
@@ -251,6 +266,11 @@
     
 
         </include>
+    </context>
+
+    <!-- The hyphen (-), asterisk (*) and underscore (_) forms are specific to Asciidoctor -->
+    <context id="blockRule" style-ref="block-boundary">
+        <match>^(?:'{3,}|(?:\*\*\*|---|___|\* \* \*|- - -|_ _ _))$</match>
     </context>
     
     <!-- BLOCK MACROS / PREPROCESSOR -->
@@ -265,7 +285,7 @@
     </context>
 
     <context id="setAttr" end-at-line-end="true" style-ref="preprocessor">
-        <start>^:[\w\s\.]+!?:([ ]|$)</start>
+        <start>^:[\w\s-\.]+!?:([ ]|$)</start>
         <end>$</end>
     </context>
 
@@ -392,6 +412,7 @@
     -->
     <context id="asciidoc">
         <include>
+          <context ref="blockRule" />
           <context ref="blockMacro" />
           <context ref="blockPreproc" />
           <context ref="setAttr" />
