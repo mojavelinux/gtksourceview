@@ -34,45 +34,50 @@
     <style id="markup-admonition" _name="Admonition"          map-to="def:note"/>
     <style id="markup-attribute"  _name="Attribute"           map-to="def:string"/>
     <style id="markup-anchor"     _name="Anchor"              map-to="def:identifier"/>
-    <style id="markup-crosslink"  _name="Link"                map-to="xml:element-name"/>  
-    <style id="markup-url"        _name="URL"                 map-to="def:underlined"/>  
-    <style id="struct-title"      _name="Title"               map-to="def:type"/>
+    <style id="markup-crosslink"  _name="Link"                map-to="xml:element-name"/>
+    <style id="markup-url"        _name="URL"                 map-to="def:underlined"/>
+    <style id="struct-sectitle"   _name="Section Title"       map-to="def:type"/>
     <style id="struct-blocktitle" _name="Block Title"         map-to="def:identifier"/>
-    <style id="struct-style"      _name="Style"               map-to="def:identifier"/>
-    <style id="par-literal"       _name="Literal"             map-to="def:string"/>  
-    <style id="block-listing"     _name="Listing"             map-to="def:comment"/>  
-    <style id="block-fenced-code" _name="Source Code"         map-to="def:comment"/>  
-    <style id="block-comment"     _name="Comment"             map-to="def:comment"/>  
-    <style id="block-boundary"    _name="Block Boundary"      map-to="def:identifier"/>  
-    <style id="macro"             _name="Macro"               map-to="def:keyword"/>  
-    <style id="preprocessor"      _name="Preprocessor"        map-to="def:preprocessor"/>  
+    <style id="struct-attrlist"   _name="Attribute List"      map-to="def:identifier"/>
+    <style id="para-literal"      _name="Literal"             map-to="def:string"/>
+    <style id="block-listing"     _name="Listing"             map-to="def:comment"/>
+    <style id="block-fenced-code" _name="Source Code"         map-to="def:comment"/>
+    <style id="line-comment"      _name="Comment"             map-to="def:comment"/>
+    <style id="block-boundary"    _name="Block Boundary"      map-to="def:identifier"/>
+    <style id="macro"             _name="Macro"               map-to="def:keyword"/>
+    <style id="preprocessor"      _name="Preprocessor"        map-to="def:preprocessor"/>
     <style id="list-identifier"   _name="List Identifier"     map-to="def:special-char"/>
+    <style id="continuation"      _name="Continuation"        map-to="def:constant"/>
+    <style id="line-break"        _name="Line Break"          map-to="def:constant"/>
   </styles>
 
   <definitions>
 
     <define-regex id="asciidocBackslash">\\</define-regex>
     <define-regex id="asciidocLineBreak">[ \t]+\s*$</define-regex>
-    
+
     <define-regex id="macro-names">image|include|video|audio|toc|sys|sys2|eval</define-regex>
     <define-regex id="inline-macro-names">pass|latexmath|asciimath|indexterm|indexterm2|footnote|footnoteref</define-regex>
     <define-regex id="preproc-names">ifdef|ifndef|ifeval|endif|unfloat|template</define-regex>
 
     <!-- TITLES -->
-    <context id="title">
+    <context id="sectionTitle">
         <include>
-            <context id="onelineTitle"><include>
-                <context id="title0" style-ref="struct-title"><match>^=\s+\S.*$</match></context>
-                <context id="title1" style-ref="struct-title"><match>^==\s+\S.*$</match></context>
-                <context id="title2" style-ref="struct-title"><match>^===\s+\S.*$</match></context>
-                <context id="title3" style-ref="struct-title"><match>^====\s+\S.*$</match></context>
-                <context id="title4" style-ref="struct-title"><match>^=====\s+\S.*$</match></context>
-            </include></context>
+            <context id="onelineTitle">
+                <include>
+                    <context id="sectitle0" style-ref="struct-sectitle"><match>^=\s+\S.*$</match></context>
+                    <context id="sectitle1" style-ref="struct-sectitle"><match>^==\s+\S.*$</match></context>
+                    <context id="sectitle2" style-ref="struct-sectitle"><match>^===\s+\S.*$</match></context>
+                    <context id="sectitle3" style-ref="struct-sectitle"><match>^====\s+\S.*$</match></context>
+                    <context id="sectitle4" style-ref="struct-sectitle"><match>^=====\s+\S.*$</match></context>
+                </include>
+            </context>
         </include>
     </context>
-    
+
     <!-- TABLES -->
-    <context id="theTable" extend-parent="false">
+    <!-- TODO should be included in delimitedBlocks -->
+    <context id="tableBlock" extend-parent="false">
         <start>^(\|====+)\s*$</start>
         <end>^(\%{1@start})\s*$</end>
         <include>
@@ -88,18 +93,18 @@
             </context>
         </include>
     </context>
-    
+
     <!-- BLOCKS -->
-    <context id="theBlocks">
+    <context id="delimitedBlocks">
         <include>
-            <context id="commentBlock" style-ref="block-comment" extend-parent="false">
+            <context id="commentBlock" style-ref="line-comment" extend-parent="false">
                 <start>^(\/\/\/\/+)\s*$</start>
                 <end>^(\%{1@start})\s*$</end>
             </context>
-            <context id="theComment" style-ref="block-comment" extend-parent="false">
-                <match>^\/\/.*$</match>
+            <context id="lineComment" style-ref="line-comment" extend-parent="false">
+                <match>^\/\/(|[^\/].*)$</match>
             </context>
-            <context id="passthroughBlock" style-ref="block-listing" extend-parent="false">
+            <context id="passBlock" style-ref="block-listing" extend-parent="false">
                 <start>^(\+\+\+\++)\s*$</start>
                 <end>^(\%{1@start})\s*$</end>
             </context>
@@ -112,7 +117,7 @@
                 <start>^(----+)\s*$</start>
                 <end>^(\%{1@start})\s*$</end>
             </context>
-            <context id="literalBlock" style-ref="par-literal" extend-parent="false">
+            <context id="literalBlock" style-ref="para-literal" extend-parent="false">
                 <start>^(\.\.\.\.+)\s*$</start>
                 <end>^(\%{1@start})\s*$</end>
             </context>
@@ -122,9 +127,9 @@
                 <include>
                     <context sub-pattern="1" where="start" style-ref="block-boundary" />
                     <context sub-pattern="1" where="end" style-ref="block-boundary" />
-                    <context ref="blockMacro" />
-                    <context ref="theLists" />
-                    <context ref="parIndented" />
+                    <context ref="blockMacros" />
+                    <context ref="listBlocks" />
+                    <context ref="literalPara" />
                     <context ref="paragraph" />
                 </include>
             </context>
@@ -134,9 +139,9 @@
                 <include>
                     <context sub-pattern="1" where="start" style-ref="block-boundary" />
                     <context sub-pattern="1" where="end" style-ref="block-boundary" />
-                    <context ref="blockMacro" />
-                    <context ref="theLists" />
-                    <context ref="parIndented" />
+                    <context ref="blockMacros" />
+                    <context ref="listBlocks" />
+                    <context ref="literalPara" />
                     <context ref="paragraph" />
                 </include>
             </context>
@@ -146,13 +151,37 @@
                 <include>
                     <context sub-pattern="1" where="start" style-ref="block-boundary" />
                     <context sub-pattern="1" where="end" style-ref="block-boundary" />
-                    <context ref="blockMacro" />
-                    <context ref="theLists" />
-                    <context ref="parIndented" />
+                    <context ref="blockMacros" />
+                    <context ref="listBlocks" />
+                    <context ref="literalPara" />
+                    <context ref="paragraph" />
+                </include>
+            </context>
+            <context id="openBlock" extend-parent="false" style-inside="true">
+                <start>^(--)\s*$</start>
+                <end>^(--)\s*$</end>
+                <include>
+                    <context sub-pattern="1" where="start" style-ref="block-boundary" />
+                    <context sub-pattern="1" where="end" style-ref="block-boundary" />
+                    <!-- TODO make this set a standard complex block content set -->
+                    <context ref="preprocessors" />
+                    <context ref="blockHorizontalRule" />
+                    <context ref="blockMacros" />
+                    <context ref="blockTitle" />
+                    <context ref="blockAttributeList" />
+                    <context ref="blockAnchor" />
+                    <context ref="delimitedBlocks" />
+                    <context ref="tableBlock" />
+                    <context ref="listBlocks" />
+                    <context ref="literalPara" />
                     <context ref="paragraph" />
                 </include>
             </context>
         </include>
+    </context>
+
+    <context id="constrainedQuotedText" extend-parent="false">
+        <match>(?:\S|\S.*?\S)</match>
     </context>
 
     <context id="markup">
@@ -165,43 +194,47 @@
             <context id="DoubleQuote" extend-parent="false">
                 <match>\B``[^\s`'].*?[^\s`']''\B</match>
             </context>
-            
+
             <!-- CROSSLINKS and URLS -->
             <context id="crosslink" style-ref="markup-crosslink" extend-parent="false">
                 <match>&lt;&lt;\w+(,[^&lt;&gt;]+)?&gt;&gt;</match>
             </context>
-            
+
             <!-- url with [] -->
-            <context id="url1" style-ref="markup-url" extend-parent="false"> 
+            <context id="url1" style-ref="markup-url" extend-parent="false">
                 <start>(http(s?):\/\/|ftp:\/\/|file:\/\/|mailto:|callto:)[^\s\[]+\[</start>
                 <end>\]</end>
             </context>
 
-            <!-- url without [] -->            
+            <!-- url without [] -->
             <context id="url2" style-ref="markup-url" extend-parent="false">
                 <match>(http(s?):\/\/|ftp:\/\/|file:\/\/|mailto:|callto:)[^\s\[]+</match>
             </context>
 
+            <!-- TODO support URL form {refname}[Text] -->
+
             <context id="email" style-ref="markup-url" extend-parent="false">
                 <match>\b[\w\.\/-]+@[\w\.\/-]+\b</match>
             </context>
-            
-            
+
             <!-- PASSTHROUGH -->
-            <context id="Pass" style-ref="markup-pass" extend-parent="false">
+            <context id="pass" style-ref="markup-pass" extend-parent="false">
                 <match>\$\$.+?\$\$</match>
             </context>
-            <context id="PassUnconstrained" style-ref="markup-pass" extend-parent="false">
+            <context id="passUnconstrained" style-ref="markup-pass" extend-parent="false">
                 <match>\+\+\+.+?\+\+\+</match>
             </context>
-            <context id="Replacement" style-ref="markup-replace" extend-parent="false">
+            <context id="replacement" style-ref="markup-replace" extend-parent="false">
                 <match>\(C\)|\(TM\)|\(R\)|(?&lt;!-)--(?!-)|\.{3}|-&gt;|&lt;-|=&gt;|&lt;=</match>
             </context>
-            <context id="Admonition" style-ref="markup-admonition" extend-parent="false">
-                <match>^(NOTE|TIP|CAUTION|IMPORTANT|WARNING):(?=\s)</match>
+            <context id="admonition" style-ref="markup-admonition" extend-parent="false">
+                <match>^(NOTE|TIP|CAUTION|IMPORTANT|WARNING):(?=[ \t])</match>
             </context>
 
-            <!-- MONOSPACED --> 
+            <!-- MONOSPACED -->
+
+            <!-- old definitions -->
+            <!--
             <context id="MonospacePlus" style-ref="markup-monospace" extend-parent="false">
                 <start>(?&lt;=^|[ \t\(\[.,\-])\+(?![\)])</start>
                 <end>(\+(?=[ \t\(\)\],.?!;:\-]|$)|$(?=^$))</end>
@@ -210,13 +243,29 @@
                 <start>(?&lt;=^|[ \t\(\[.,\-])`(?![\)])</start>
                 <end>(`(?=[ \t\(\)\],.?!;:\-]|$)|$(?=^$))</end>
             </context>
+            -->
+
+            <context id="monospaceConstrained" style-ref="markup-monospace" extend-parent="false">
+                <start>(?&lt;=^|[^\w;:}])(\[(?:[^\]]+?)\])?(\+|`)(?=\S)</start>
+                <end>\S(\%{2@start})(?=\W|$)</end>
+                <include>
+                    <context sub-pattern="1" where="start" style-ref="struct-attrlist" />
+                </include>
+            </context>
+
             <context id="MonospaceUnconstrained" style-ref="markup-monospace" extend-parent="false">
                 <start>\+\+\S</start>
                 <end>(\+\+|^$)</end>
             </context>
 
             <!-- EMPHASIZED -->
+
+            <!-- old definitions -->
+            <!--
             <context id="EmphasisQuote" style-ref="markup-emphasis" extend-parent="false">
+                <start>(?&lt;=^|[^\w;:}])(?:\[([^\]]+?)\])?'\S</start>
+                <end>\S'(?=\W|$)</end>
+
                 <start>(?&lt;=^|[ \t\(\[.,\-])'(?![\)])</start>
                 <end>('(?=[ \t\(\)\],.?!;:\-]|$)|$(?=^$))</end>
             </context>
@@ -224,21 +273,44 @@
                 <start>(?&lt;=^|[ \t\(\[.,\-])_(?![\)])</start>
                 <end>(_(?=[ \t\(\)\],.?!;:\-]|$)|$(?=^$))</end>
             </context>
+            -->
+
+            <context id="emphasisConstrained" style-ref="markup-emphasis" extend-parent="false">
+                <start>(?&lt;=^|[^\w;:}])(\[(?:[^\]]+?)\])?(_|')(?=\S)</start>
+                <end>\S(\%{2@start})(?=\W|$)</end>
+                <include>
+                    <context sub-pattern="1" where="start" style-ref="struct-attrlist" />
+                </include>
+            </context>
+
             <context id="EmphasisUnconstrained" style-ref="markup-emphasis" extend-parent="false">
                 <start>__\S</start>
                 <end>(__|^$)</end>
             </context>
 
             <!-- STRONG (BOLD) -->
+
+            <!-- old definitions -->
+            <!--
             <context id="Strong" style-ref="markup-strong" extend-parent="false">
                 <start>(?&lt;=^|[ \t\(\[.,\-])\*(?![\)])</start>
                 <end>(\*(?=[ \t\(\)\],.?!;:\-]|$)|$(?=^$))</end>
             </context>
+            -->
+
+            <context id="strongConstrained" style-ref="markup-strong" extend-parent="false">
+                <start>(?&lt;=^|[^\w;:}\\])(\[(?:[^\]]+?)\])?(\*)(?=\S)</start>
+                <end>\S(\%{2@start})(?=\W|$)</end>
+                <include>
+                    <context sub-pattern="1" where="start" style-ref="struct-attrlist" />
+                </include>
+            </context>
+
             <context id="StrongUnconstrained" style-ref="markup-strong" extend-parent="false">
                 <start>\*\*\S</start>
                 <end>(\*\*|^$)</end>
             </context>
-            
+
             <!-- INLINE MACROS -->
             <context id="inlineMacro" style-ref="macro" extend-parent="false">
                 <start>(\%{macro-names}|\%{inline-macro-names}):[^\s\[\]]*\[</start>
@@ -246,11 +318,11 @@
             </context>
 
             <!-- Attributes -->
-            <context id="theAttribute" style-ref="markup-attribute" extend-parent="false">
+            <context id="attributeReference" style-ref="markup-attribute" extend-parent="false">
                 <match>(?&lt;!\\)\{\w+(?:[\-]\w+)*\}</match>
             </context>
 
-            <context id="theAttributeAssignment" style-ref="macro" extend-parent="false">
+            <context id="attributeAssignment" style-ref="macro" extend-parent="false">
                 <match>\{(?:set|counter2?):.+?\}</match>
             </context>
 
@@ -263,95 +335,98 @@
             <context id="theAnchor" style-ref="markup-anchor" extend-parent="false">
                 <match>\[\[[^\]]+\]\]</match>
             </context>
-    
+
 
         </include>
     </context>
 
     <!-- The hyphen (-), asterisk (*) and underscore (_) forms are specific to Asciidoctor -->
-    <context id="blockRule" style-ref="block-boundary">
+    <context id="blockHorizontalRule" style-ref="block-boundary">
         <match>^(?:'{3,}|(?:\*\*\*|---|___|\* \* \*|- - -|_ _ _))$</match>
     </context>
-    
+
     <!-- BLOCK MACROS / PREPROCESSOR -->
-    <context id="blockMacro" end-at-line-end="true" style-ref="macro">
+    <context id="blockMacros" end-at-line-end="true" style-ref="macro">
         <start>^(\%{macro-names})::[^\s\[\]]*\[</start>
         <end>\]$</end>
     </context>
-    
-    <context id="blockPreproc" end-at-line-end="true" style-ref="preprocessor">
+
+    <context id="preprocessors" end-at-line-end="true" style-ref="preprocessor">
         <start>^(\%{preproc-names})::[^\s\[\]]*\[</start>
         <end>\]$</end>
     </context>
 
-    <context id="setAttr" end-at-line-end="true" style-ref="preprocessor">
-        <start>^:[\w\s-\.]+!?:([ ]|$)</start>
-        <end>$</end>
+    <context id="attributeEntry" end-at-line-end="true" extend-parent="false">
+        <start>^(:!?[\w\s-\.]+!?:)(?: |$)</start>
+        <end>( \+)?$</end>
+        <include>
+          <context sub-pattern="1" where="start" style-ref="list-identifier"/>
+          <context sub-pattern="1" where="end" style-ref="continuation"/>
+        </include>
     </context>
 
     <!-- TITLES/STYLES/ANCHORS -->
     <context id="blockTitle" style-ref="struct-blocktitle" end-at-line-end="true">
-        <start>^\.[^. \t].*[^\-~_]</start>
+        <start>^\.[^. \t].*</start>
         <end>$</end>
     </context>
 
-    <context id="theStyle" style-ref="struct-style">
+    <context id="blockAttributeList" style-ref="struct-attrlist">
         <match>^\[[^\[\]]+\]$</match>
     </context>
 
     <!-- Anchor -->
-    <context id="oneLineAnchor" style-ref="markup-anchor" extend-parent="false">
+    <context id="blockAnchor" style-ref="markup-anchor" extend-parent="false">
         <match>^\[\[[^\]]+\]\]$</match>
     </context>
 
-    
+
     <!-- PARAGRAPHS -->
-    <context id="parIndented" extend-parent="false" style-ref="par-literal">
+    <context id="literalPara" extend-parent="false" style-ref="para-literal">
         <start>^\s+(?!(\*+|\-+|\.+)\s)\S+.*$</start>
         <end>^\s*$</end>
     </context>
-    
+
     <context id="paragraph" extend-parent="false">
         <start>^(?=\S)</start>
         <end>^\s*$</end>
         <include>
-        
+
             <!-- Underlines inside paragraphs FIXME! -->
-            <context id="titleline0" style-ref="struct-title" end-parent="true">
+            <context id="sectitleline0" style-ref="struct-sectitle" end-parent="true">
                 <match>^===+$</match>
             </context>
-            <context id="titleline1" style-ref="struct-title" end-parent="true">
+            <context id="sectitleline1" style-ref="struct-sectitle" end-parent="true">
                 <match>^---+$</match>
             </context>
-            <context id="titleline2" style-ref="struct-title" end-parent="true">
+            <context id="sectitleline2" style-ref="struct-sectitle" end-parent="true">
                 <match>^~~~+$</match>
             </context>
-            <context id="titleline3" style-ref="struct-title" end-parent="true">
+            <context id="sectitleline3" style-ref="struct-sectitle" end-parent="true">
                 <match>^\^\^\^+$</match>
             </context>
-            <context id="titleline4" style-ref="struct-title" end-parent="true">
+            <context id="sectitleline4" style-ref="struct-sectitle" end-parent="true">
                 <match>^\+\+\++$</match>
             </context>
-        
-        
+
             <context ref="markup" />
-            <context ref="blockPreproc" />
-            <context ref="setAttr" />
+            <context ref="preprocessors" />
+            <context ref="attributeEntry" />
         </include>
-    </context>    
+    </context>
 
     <!-- LISTS -->
-    <context id="theLists">
+    <context id="listBlocks">
         <include>
             <context id="bulletedList" extend-parent="false">
                 <start>^\s*(-|\*{1,5})\s+(?=\S)</start>
                 <end>^\s*$</end>
                 <include>
                     <context sub-pattern="1" where="start" style-ref="list-identifier" />
-                    <context ref="theLists" />
+                    <context ref="listBlocks" />
                     <context ref="markup" />
-                    <context ref="blockPreproc" />
-                    <context ref="setAttr" />
+                    <context ref="preprocessors" />
+                    <context ref="attributeEntry" />
                 </include>
             </context>
             <context id="numberedListExplicit" extend-parent="false">
@@ -359,10 +434,10 @@
                 <end>^\s*$</end>
                 <include>
                     <context sub-pattern="1" where="start" style-ref="list-identifier" />
-                    <context ref="theLists" />
+                    <context ref="listBlocks" />
                     <context ref="markup" />
-                    <context ref="blockPreproc" />
-                    <context ref="setAttr" />
+                    <context ref="preprocessors" />
+                    <context ref="attributeEntry" />
                 </include>
             </context>
             <context id="numberedListImplicit" extend-parent="false">
@@ -370,10 +445,10 @@
                 <end>^\s*$</end>
                 <include>
                     <context sub-pattern="1" where="start" style-ref="list-identifier" />
-                    <context ref="theLists" />
+                    <context ref="listBlocks" />
                     <context ref="markup" />
-                    <context ref="blockPreproc" />
-                    <context ref="setAttr" />
+                    <context ref="preprocessors" />
+                    <context ref="attributeEntry" />
                 </include>
             </context>
             <context id="labeledList" extend-parent="false" style-inside="false">
@@ -381,18 +456,19 @@
                 <end>^\s*$</end>
                 <include>
                     <context sub-pattern="0" where="start" style-ref="list-identifier" />
-                    <context ref="theLists" />
+                    <context ref="listBlocks" />
                     <context ref="markup" />
-                    <context ref="blockPreproc" />
-                    <context ref="setAttr" />
+                    <context ref="preprocessors" />
+                    <context ref="attributeEntry" />
                 </include>
             </context>
-            <context id="listContinuator" end-parent="true" style-ref="list-identifier">
+            <context id="listContinuation" end-parent="true" style-ref="continuation">
                 <match>^\+\s*$</match>
             </context>
+            <!--
             <context id="listBoundary" extend-parent="false">
-                <start>^--\s*$</start>
-                <end>^--\s*$</end>
+                <start>^-{added for XML comment}-\s*$</start>
+                <end>^-{added for XML comment}-\s*$</end>
                 <include>
                     <context sub-pattern="0" where="start" style-ref="list-identifier" />
                     <context sub-pattern="0" where="end" style-ref="list-identifier" />
@@ -402,6 +478,7 @@
                     <context ref="labeledList" />
                 </include>
             </context>
+            -->
         </include>
     </context>
 
@@ -412,18 +489,18 @@
     -->
     <context id="asciidoc">
         <include>
-          <context ref="blockRule" />
-          <context ref="blockMacro" />
-          <context ref="blockPreproc" />
-          <context ref="setAttr" />
+          <context ref="preprocessors" />
+          <context ref="sectionTitle" />
+          <context ref="attributeEntry" />
+          <context ref="blockHorizontalRule" />
+          <context ref="blockMacros" />
           <context ref="blockTitle" />
-          <context ref="theStyle" />
-          <context ref="oneLineAnchor" />
-          <context ref="theLists" />
-          <context ref="theBlocks" />
-          <context ref="title" />
-          <context ref="parIndented" />
-          <context ref="theTable" />
+          <context ref="blockAttributeList" />
+          <context ref="blockAnchor" />
+          <context ref="delimitedBlocks" />
+          <context ref="tableBlock" />
+          <context ref="listBlocks" />
+          <context ref="literalPara" />
           <context ref="paragraph" />
         </include>
     </context>
